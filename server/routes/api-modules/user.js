@@ -6,9 +6,7 @@ const userController = require('../../controllers/api/user-controller')
 router.get('/', userController.getUsers)
 
 // register
-router.post('/', (req, res) => {
-  res.send('registration - create user')
-})
+router.post('/', userController.signUp)
 
 // login
 router.post('/login', (req, res) => {
