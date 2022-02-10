@@ -1,10 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const userController = require('../../controllers/api/user-controller')
 
 // get user list
-router.get('/', (req, res) => {
-  res.send('user list')
-})
+router.get('/', userController.getUsers)
 
 // register
 router.post('/', (req, res) => {

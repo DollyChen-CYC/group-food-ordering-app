@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const groupController = require('../../controllers/api/group-controller')
 
 // create a new group
 router.post('/', (req, res) => {

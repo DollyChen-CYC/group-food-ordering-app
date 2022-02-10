@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const restaurantController = require('../../controllers/api/restaurant-controller')
 
 // get all restaurants
 router.get('/', (req, res) => {
