@@ -1,47 +1,46 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/api/user-controller')
+const { authenticator, authenticatorAdmin } = require('../../middleware/auth')
 
 // get user list
-router.get('/', userController.getUsers)
+router.get('/', authenticator, authenticatorAdmin, userController.getUsers)
 
 // register
 router.post('/', userController.signUp)
 
 // login
-router.post('/login', (req, res) => {
-  res.send('user login')
-})
+router.post('/login', userController.login)
 
 // get user profile
-router.get('/:user_id', (req, res) => {
+router.get('/:user_id', authenticator, (req, res) => {
   res.send('user profile')
 })
 
 // update user profile
-router.put('/:user_id', (req, res) => {
+router.put('/:user_id', authenticator, (req, res) => {
   res.send('modify user profile')
 })
 
 // -------- user orders --------- //
 
 // create user order
-router.post('/orders', (req, res) => {
+router.post('/orders', authenticator, (req, res) => {
   res.send('create new user order')
 })
 
 // get all orders
-router.get('/orders', (req, res) => {
+router.get('/orders', authenticator, (req, res) => {
   res.send('get all user orders')
 })
 
 // revise order
-router.put('/orders/:order_id', (req, res) => {
+router.put('/orders/:order_id', authenticator, (req, res) => {
   res.send('revise order details')
 })
 
 // delete order
-router.delete('/orders/:order_id', (req, res) => {
+router.delete('/orders/:order_id', authenticator, (req, res) => {
   res.send('cancel order')
 })
 
