@@ -12,20 +12,25 @@ const userController = {
 
     User.findByPk(userId)
       .then(user => {
-        if (!user) return res.status(404).json({ status: 'error', message: 'User not exist.' })
+        if (!user) return res.status(404).json({ status: 'error', message: `User (ID: ${userId}) does not exist.` })
 
         const { id, email, name, password, cell_phone: cellPhone } = user
         return res.json({
           status: 'success',
           message: 'ok',
-          user: {
-            id,
-            email,
-            name,
-            cellPhone
+          data: {
+            user: {
+              id,
+              email,
+              name,
+              cellPhone
+            }
           }
         })
-      }).catch(err => console.log(err))
+      }).catch(err => {
+        console.log('-- Failed to get user info --', err)
+        return res.status(500).json({ status: 'error', message: 'Failed to get user info' })
+      })
   },
   login: (req, res) => {
     const { email, password } = req.body
@@ -33,10 +38,10 @@ const userController = {
 
     User.findOne({ where: { email } })
       .then(user => {
-        if (!user) return res.status(401).json({ status: 'error', message: 'User not found.' })
+        if (!user) return res.json({ status: 'error', message: 'User does not exist.' })
 
         const isPasswordPassed = bcrypt.compareSync(password, user.password)
-        if (!isPasswordPassed) return res.status(401).json({ status: 'error', message: 'The password is incorrect.' })
+        if (!isPasswordPassed) return res.json({ status: 'error', message: 'The password is incorrect.' })
 
         // sign Token
         const { id, name, email, cell_phone: cellPhone, is_admin: isAdmin } = user
@@ -45,17 +50,23 @@ const userController = {
 
         return res.json({
           status: 'success',
-          message: 'OK',
-          token,
-          user: {
-            id,
-            name,
-            email,
-            cellPhone,
-            isAdmin
-          },
-          isAuthenticated: true
+          message: 'Login successfully',
+          data: {
+            token,
+            user: {
+              id,
+              name,
+              email,
+              cellPhone,
+              isAdmin,
+              isAuthenticated: true
+            },
+          }
         })
+      })
+      .catch(err => {
+        console.log('-- Login Failed --', err)
+        return res.status(500).json({ status: 'error', message: 'Login Failed' })
       })
   },
   putUser: (req, res) => {
@@ -72,7 +83,10 @@ const userController = {
 
     User.update({ name, cell_phone: cellPhone }, { where: { id: userId } })
       .then(user => res.json({ status: 'success', message: 'Profile updated!' }))
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log('-- Failed to update user info --', err)
+        return res.status(500).json({ status: 'error', message: 'Failed to update user info' })
+      })
   },
   signUp: (req, res) => {
     const { email, name, password, confirmPassword, cellPhone } = req.body
@@ -98,10 +112,12 @@ const userController = {
         })
       })
       .then(user => {
-        console.log('--Registration success!--')
         return res.json({ status: 'success', message: 'Registration success!' })
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log('-- Registration Failed --', err)
+        return res.status(500).json({ status: 'error', message: 'Registration Failed' })
+      })
   }
 }
 
