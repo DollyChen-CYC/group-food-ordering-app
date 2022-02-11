@@ -10,20 +10,13 @@ router.get('/', restaurantController.getRestaurants)
 router.post('/', authenticatorAdmin, restaurantController.postRestaurant)
 
 // get a restaurant
-router.get('/:restaurant_id', (req, res) => {
-  const id = req.params.restaurant_id
-  res.send(`show certain restaurant. id : ${id}`)
-})
+router.get('/:restaurant_id', restaurantController.getRestaurant)
 
 // update a restaurant - admin only
-router.put('/:restaurant_id', authenticatorAdmin, (req, res) => {
-  res.send('update information of a restaurant')
-})
+router.put('/:restaurant_id', authenticatorAdmin, restaurantController.putRestaurant)
 
 // delete a restaurant - admin only
-router.delete('/:restaurant_id', authenticatorAdmin, (req, res) => {
-  res.send('delete a restaurant')
-})
+router.delete('/:restaurant_id', authenticatorAdmin, restaurantController.deleteRestaurant)
 
 // ------ menu, dishes -------- //
 

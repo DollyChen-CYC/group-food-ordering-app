@@ -1,4 +1,5 @@
 const { Restaurant, Dish } = require('../../models')
+const sequelize = require('sequelize')
 
 const restaurantController = {
   deleteDish: (req, res) => {
@@ -17,6 +18,43 @@ const restaurantController = {
         return res.status(500).json({ status: "error", message: "Failed to delete dish." })
       })
   },
+  deleteRestaurant: (req, res) => {
+    const restaurantId = req.params.restaurant_id
+    Restaurant.findByPk(restaurantId)
+      .then(restaurant => {
+        if (!restaurant) return res.json({ status: "error", message: "Restaurant does not exist." })
+        return restaurant.destroy()
+      })
+      .then(restaurant => {
+        return res.json({ status: "success", message: `Restaurant (ID: ${restaurant.id}) is deleted successfully.` })
+      })
+      .catch(err => {
+        console.log(`-- Failed to delete restaurant --`)
+        return res.status(500).json({ status: "error", message: "Failed to delete restaurant." })
+      })
+  },
+  getRestaurant: (req, res) => {
+    const restaurantId = req.params.restaurant_id
+
+    Restaurant.findByPk(restaurantId, {
+      attributes: [
+        'name',
+        'description',
+        'image',
+        'telephone',
+      ],
+      include: [{ model: Dish, as: 'Dishes', attributes: ['id', 'name', 'price', 'description'] }]
+    })
+      .then(restaurant => {
+        if (!restaurant) return res.json({ status: "error", message: "Restaurant does not exist." })
+
+        return res.json({ status: "success", message: "ok", data: { restaurant } })
+      })
+      .catch(err => {
+        console.log('-- Failed to get restaurant info --', err)
+        return res.status(500).json({ status: "error", message: "Failed to get restaurant info" })
+      })
+  },
   getRestaurants: (req, res) => {
     Restaurant.findAll({
       raw: true,
@@ -29,7 +67,7 @@ const restaurantController = {
         'telephone'
       ]
     })
-      .then(restaurants => res.json({ status: 'success', message: 'OK', data: { restaurants } }))
+      .then(restaurants => res.json({ status: 'success', message: 'ok', data: { restaurants } }))
       .catch(err => {
         console.log('-- Failed to get restaurants --', err)
         return res.status(500).json({ status: 'error', message: 'Failed to get restaurants' })
@@ -81,18 +119,35 @@ const restaurantController = {
   putDish: (req, res) => {
     const dishId = req.params.dish_id
     const { name, price, description } = req.body
+    if (!name || !price) return res.json({ status: "error", message: "Some required fields are empty." })
 
     Dish.findByPk(dishId)
       .then(dish => {
         if (!dish) return res.json({ status: 'error', message: 'dish does not exist!' })
-        if (!name || !price) return res.json({ status: "error", message: "Some required fields are empty." })
-
         return dish.update({ name, price, description })
       })
       .then(dish => res.json({ status: "success", message: `Dish (${dish.name}) is updated.` }))
       .catch(err => {
         console.log('Failed to update dish', err)
         return res.status(500).json({ status: "error", message: "Failed to update dish info." })
+      })
+  },
+  putRestaurant: (req, res) => {
+    const restaurantId = req.params.restaurant_id
+    const { name, description, image, telephone } = req.body
+    if (!name || !telephone) return res.json({ status: "error", message: "Some required fields are empty." })
+
+    Restaurant.findByPk(restaurantId)
+      .then(restaurant => {
+        if (!restaurant) return res.json({ status: "error", message: "Restaurant does not exist." })
+        return restaurant.update({ name, description, image, telephone })
+      })
+      .then(restaurant => {
+        return res.json({ status: "success", message: `Restaurant (${restaurant.name}) is updated.` })
+      })
+      .catch(err => {
+        console.log('-- Failed to update restaurant info --', err)
+        return res.status(500).json({ status: "error", message: "Failed to update restaurant info" })
       })
   }
 }
