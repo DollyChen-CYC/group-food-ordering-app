@@ -3,14 +3,10 @@ const router = express.Router()
 const restaurantController = require('../../controllers/api/restaurant-controller')
 
 // get all restaurants
-router.get('/', (req, res) => {
-  res.send('restaurant list')
-})
+router.get('/', restaurantController.getRestaurants)
 
 // create new restaurant
-router.post('/', (req, res) => {
-  res.send('create new restaurant')
-})
+router.post('/', restaurantController.postRestaurant)
 
 // get a restaurant
 router.get('/:restaurant_id', (req, res) => {
