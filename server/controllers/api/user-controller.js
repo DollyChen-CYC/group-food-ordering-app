@@ -1,8 +1,25 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../../models')
+const { User, User_order, Group_order, Restaurant, Dish } = require('../../models')
 
 const userController = {
+  deleteUserOrder: (req, res) => {
+    const orderId = +req.params.order_id
+    User_order.findByPk(orderId)
+      .then(order => {
+        if (!order) return res.json({ status: "error", message: "Order does not exist." })
+        // avoid deleting order not does not belong to the current user
+        if (order.user_id !== +req.user.id && !req.user.is_admin) return res.status(403).json({ status: 'error', message: 'permission denied' })
+        return order.destroy()
+      })
+      .then(order => {
+        return res.json({ status: "success", message: `Order (ID: ${order.id}) is successfully deleted.` })
+      })
+      .catch(err => {
+        console.log('-- Failed to delete order --', err)
+        res.status(500).json({ status: "error", message: "Failed to delete order" })
+      })
+  },
   getUser: (req, res) => {
     const userId = +req.params.user_id
     User.findByPk(userId)
@@ -25,6 +42,57 @@ const userController = {
       }).catch(err => {
         console.log('-- Failed to get user info --', err)
         return res.status(500).json({ status: 'error', message: 'Failed to get user info' })
+      })
+  },
+  getUserOrder: (req, res) => {
+    const orderId = +req.params.order_id
+    User_order.findByPk(orderId, {
+      include: [
+        {
+          model: Group_order,
+          attributes: ['id', 'restaurant_id', 'order_delivery_time', 'order_status'],
+          include: [{ model: Restaurant, attributes: ['id', 'name'] }]
+        },
+        {
+          model: Dish,
+          attributes: ['name', 'price']
+        }
+      ]
+    })
+      .then(order => {
+        if (!order) return res.json({ status: "error", message: "Order does not exist." })
+        return res.json({ status: "success", message: 'ok', data: { order } })
+      })
+      .catch(err => {
+        console.log('-- Failed to get order info --', err)
+        return res.status(500).json({ status: "error", message: "Failed to get order info." })
+      })
+  },
+  getUserOrders: (req, res) => {
+    const userId = +req.params.user_id
+    User_order.findAll({
+      raw: true,
+      nest: true,
+      where: { user_id: userId },
+      attributes: ['id', 'user_id', 'dish_id', 'group_id'],
+      include: [
+        {
+          model: Group_order,
+          attributes: ['id', 'restaurant_id', 'order_delivery_time', 'take_meal_at', 'order_status'],
+          include: [{ model: Restaurant, attributes: ['id', 'name'] }]
+        },
+        {
+          model: Dish,
+          attributes: ['name', 'price']
+        }
+      ],
+    })
+      .then(orders => {
+        return res.json({ status: "success", message: "ok", data: { orders } })
+      })
+      .catch(err => {
+        console.log('-- Failed to get user orders --', err)
+        return res.status(500).json({ status: "error", message: "Failed to get user orders" })
       })
   },
   login: (req, res) => {
@@ -64,8 +132,20 @@ const userController = {
         return res.status(500).json({ status: 'error', message: 'Login Failed' })
       })
   },
-  postUserOrder: (req,res) => {
-    res.send('create new user order')
+  postUserOrder: (req, res) => {
+    const user_id = +req.params.user_id
+    const { dishId: dish_id, groupId: group_id } = req.body
+    if (!dish_id || !group_id) {
+      return res.json({ status: 'error', message: 'Some required fields are empty!' })
+    }
+    User_order.create({ user_id, dish_id, group_id })
+      .then(order => {
+        return res.json({ status: "success", message: "Successfully placed order.", data: { order } })
+      })
+      .catch(err => {
+        console.log('-- Failed to create order --', err)
+        return res.status(500).json({ status: "error", message: "Failed to create order" })
+      })
   },
   putUser: (req, res) => {
     const userId = +req.params.user_id

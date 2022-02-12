@@ -22,8 +22,6 @@ router.put('/:group_id/status',permissionChecker.admin, groupController.putOrder
 router.delete('/:group_id', permissionChecker.admin, groupController.deleteGroup)
 
 // get order details of a food ordering group - admin only
-router.get('/orders/:group_id', permissionChecker.admin, (req, res) => {
-  res.send('order details: total qty, total price, restaurant-tel... ')
-})
+router.get('/orders/:group_id', permissionChecker.admin, groupController.getGroupOrder)
 
 module.exports = router

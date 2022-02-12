@@ -3,6 +3,7 @@ const router = express.Router()
 const userController = require('../../controllers/api/user-controller')
 const { authenticator } = require('../../middleware/auth')
 const permissionChecker = require('../../middleware/accessPermission')
+const { authenticate } = require('passport')
 
 // get user list
 router.get('/', authenticator, permissionChecker.admin, (req, res) => res.send('user list'))
@@ -22,21 +23,17 @@ router.put('/:user_id', authenticator, permissionChecker.accessUserProfile, user
 // -------- user orders --------- //
 
 // create user order
-router.post('/orders', authenticator, permissionChecker.accessUserProfile, userController.postUserOrder)
+router.post('/:user_id/orders', authenticator, permissionChecker.accessUserProfile, userController.postUserOrder)
 
 // get all orders
-router.get('/:user_id/orders', authenticator, permissionChecker.accessUserProfile, (req, res) => {
-  res.send('get all user orders')
-})
+router.get('/:user_id/orders', authenticator, permissionChecker.accessUserProfile, userController.getUserOrders)
 
-// revise order
-router.put('/orders/:order_id', authenticator, permissionChecker.accessUserProfile, (req, res) => {
-  res.send('revise order details')
-})
+// get certain order - admin use
+router.get('/orders/:order_id', authenticator, permissionChecker.admin, userController.getUserOrder)
 
-// delete order
-router.delete('/orders/:order_id', authenticator, permissionChecker.accessUserProfile, (req, res) => {
-  res.send('cancel order')
-})
+// delete order - admin only
+router.delete('/orders/:order_id', authenticator, permissionChecker.admin, userController.deleteUserOrder)
+// delete order - user use
+router.delete('/:user_id/orders/:order_id', authenticator, permissionChecker.accessUserProfile, userController.deleteUserOrder)
 
 module.exports = router

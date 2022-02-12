@@ -1,4 +1,5 @@
-const { Group_order, Restaurant, Dish } = require('../../models')
+const { Group_order, Restaurant, Dish, User_order } = require('../../models')
+const sequelize = require('sequelize')
 
 const groupController = {
   deleteGroup: (req, res) => {
@@ -45,6 +46,47 @@ const groupController = {
       .catch(err => {
         console.log('-- Failed to get group info --', err)
         return res.status(500).json({ status: "error", message: "Failed to get group info." })
+      })
+  },
+  getGroupOrder: (req, res) => {
+    const groupId = +req.params.group_id
+
+    return Promise.all([
+      Group_order.findByPk(groupId, {
+        include: [{ model: Restaurant, attributes: ['id', 'name', 'description', 'image', 'telephone'] }]
+      }),
+      // find all orders that belong to this food ordering group
+      User_order.findAll({
+        raw: true,
+        nest: true,
+        where: { group_id: groupId },
+        attributes: [
+          'group_id',
+          'dish_id',
+          [sequelize.fn('COUNT', sequelize.col('dish_id')), 'qty']
+        ],
+        group: ['group_id', 'dish_id'],
+        include: [
+          {
+            model: Dish,
+            attributes: ['id', 'name', 'price']
+          }
+        ]
+      })
+    ])
+      .then(results => {
+        // format response data
+        const data = {
+          group: {
+            ...results[0].toJSON(),
+            orders: results[1]
+          }
+        }
+        return res.json({ status: "success", message: "ok", data })
+      })
+      .catch(err => {
+        console.log('-- Failed to get details of food ordering group --', err)
+        return res.status(500).json({ status: 'error', message: 'Failed to get details of food ordering group' })
       })
   },
   getGroups: (req, res) => {
