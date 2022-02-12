@@ -5,11 +5,6 @@ const { User } = require('../../models')
 const userController = {
   getUser: (req, res) => {
     const userId = +req.params.user_id
-    // only admin and user himself/herself can access the user profile
-    if (userId !== +req.user.id && !req.user.is_admin) {
-      return res.status(403).json({ status: 'error', message: 'permission denied' })
-    }
-
     User.findByPk(userId)
       .then(user => {
         if (!user) return res.status(404).json({ status: 'error', message: `User (ID: ${userId}) does not exist.` })
@@ -69,13 +64,11 @@ const userController = {
         return res.status(500).json({ status: 'error', message: 'Login Failed' })
       })
   },
+  postUserOrder: (req,res) => {
+    res.send('create new user order')
+  },
   putUser: (req, res) => {
     const userId = +req.params.user_id
-    // only admin and user himself/herself can access the user profile
-    if (userId !== +req.user.id && !req.user.is_admin) {
-      return res.status(403).json({ status: 'error', message: 'permission denied' })
-    }
-
     const { name, cellPhone } = req.body
     if (!name || !cellPhone) {
       return res.json({ status: 'error', message: 'Some required fields are empty!' })
