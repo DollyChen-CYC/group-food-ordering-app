@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Dish.belongsTo(models.Restaurant, { foreignKey: 'restaurantId' })
+      Dish.belongsToMany(models.User, {
+        through: models.User_order,
+        foreignKey: 'dish_id',
+        as: 'DishOrderer'
+      })
     }
   }
   Dish.init({

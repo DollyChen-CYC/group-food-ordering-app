@@ -11,6 +11,10 @@ module.exports = {
       restaurant_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        references: {
+          model: 'Restaurants',
+          key: 'id'
+        }
       },
       order_deadline: {
         type: Sequelize.DATE,
