@@ -1,0 +1,15 @@
+// test use
+h1 {
+  color: red;
+}
+
+// reset CSS
+@import "reset";
+
+// sass settings
+@import "variables";
+// @import "mixins;
+// @import "placeholder-selectors";
+
+// project styles 
+@import url("https://fonts.googleapis.com/css?family=Roboto+Condensed");

@@ -13,5 +13,16 @@ node_modules
 *.log
 *.gz
 
-/node-modules
+# env files
 .env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
