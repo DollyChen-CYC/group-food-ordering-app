@@ -1,4 +1,7 @@
-# client
+# Client - Vue (Project in development)
+
+## COMPONENT TREE DIAGRAM 
+<img height="550" src="https://github.com/DollyChen-CYC/group-food-ordering-app/tree/main/client/src/assets/images/component_tree.png" alt="Component Tree" />
 
 ## Project setup
 ```
